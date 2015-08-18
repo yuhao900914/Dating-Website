@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Mapping</title>
+<style type="text/css">
+body{background:#ffc0cb;}
+#menu,ul,li,a{
+margin:0px;
+padding:0px;
+border:10px;
+border-color:white;
+}
+#menu li{
+list-style:none;
+float:left;
+
+}
+#menu a{
+display:block;
+text-decoration:none;
+background-color:pink;
+padding:10px;
+color:white;
+
+}
+#menu a:hover{
+background-color:#FF00CC;
+}
+.clear{
+clear:both;
+}
+#menu{
+    display:block;
+}
+
+</style>
+</head>
+<body>
+
+<div id="menu" class="clear">
+<ul>
+<li><a id="mypage">myPage</a></li>
+<li><a id="myprofile">myProfile</a></li>
+<li><a id="chatroom">Chat Room</a></li>
+<li><a id="date">Dating</a></li>
+<li><a id="info">Search Information</a></li>
+</ul>
+</div>
+<div class="clear">
+    
+</div>
+<br>
+<div id="chatlog" ></div>
+<p></p>
+Mapping option:
+
+<select id="map">
+<option value="country" SELECTED >country</option>
+<option value="age">age</option>
+<option value="education">education</option>
+<option value="hobby">hobby</option>
+</select>
+<br>
+ <button id="mapping" onclick="mapping()">mapping</button>
+ <br>
+ 
+ <fieldset id="show" style ="padding:10px;">
+<legend id="user"></legend>
+<p id="country"></p>
+<p id="gender"></p>
+<p id="age"></p>
+<p id="education"></p>
+<p id="hobby"></p>
+<p id="ps"></p>
+<p id="flower"></p>
+</fieldset>
+
+ <fieldset id="show2" style ="padding:10px;">
+<legend id="user2"></legend>
+<p id="country2"></p>
+<p id="gender2"></p>
+<p id="age2"></p>
+<p id="education2"></p>
+<p id="hobby2"></p>
+<p id="ps2"></p>
+<p id="flower2"></p>
+</fieldset>
+
+ <fieldset id="show3" style ="padding:10px;">
+<legend id="user3"></legend>
+<p id="country3"></p>
+<p id="gender3"></p>
+<p id="age3"></p>
+<p id="education3"></p>
+<p id="hobby3"></p>
+<p id="ps3"></p>
+<p id="flower3"></p>
+</fieldset>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script>
+ $("#show").hide();
+ $("#show2").hide();
+ $("#show3").hide();
+ 
+var user= location.search;
+user=user.slice(1);
+//the navigation bar
+var socketio = io.connect("ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8081");
+document.getElementById("mypage").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com/~yuhao900914/mypage.html?"+user);
+document.getElementById("myprofile").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8082/myprofile.html?"+user);
+document.getElementById("chatroom").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8080/client.html?"+user);
+document.getElementById("date").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8081/sort.html?"+user);
+document.getElementById("info").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8083/info.html?"+user);
+
+//system will automatically map a criterion of the person based on country
+
+ var m = document.getElementById("map").value;
+socketio.emit("mach", {option:m,username:user });
+
+
+//transfer the mapping opption to server 
+function mapping(){
+   $("#show").hide();
+ $("#show2").hide();
+ $("#show3").hide();
+          var m = document.getElementById("map").value;
+		 socketio.emit("mach", {option:m,username:user });
+
+     
+};
+
+//display the sorting result on the web
+socketio.on("data1",function(data) {
+
+ $("#show").show();
+    if (data["privacy"]==1) {
+    }
+    else{
+document.getElementById("user").textContent="Username:"+data["name"];
+document.getElementById("gender").textContent="Country:"+data["country"];
+document.getElementById("age").textContent="Gender:"+data["gender"];
+document.getElementById("education").textContent="Age:"+data["age"];
+document.getElementById("hobby").textContent="Education:"+data["education"];
+document.getElementById("ps").textContent="Hobby:"+data["hobby"];
+document.getElementById("country").textContent="Self-Description:"+data["ps"];
+document.getElementById("flower").textContent="flowers:"+data["flower"];
+    }
+         });
+
+socketio.on("data2",function(data) {
+ 
+ $("#show2").show();
+    if (data["privacy"]==1) {
+    }
+    else{
+document.getElementById("user2").textContent="Username:"+data["name"];
+document.getElementById("gender2").textContent="Country:"+data["country"];
+document.getElementById("age2").textContent="Gender:"+data["gender"];
+document.getElementById("education2").textContent="Age:"+data["age"];
+document.getElementById("hobby2").textContent="Education:"+data["education"];
+document.getElementById("ps2").textContent="Hobby:"+data["hobby"];
+document.getElementById("country2").textContent="Self-Description:"+data["ps"];
+document.getElementById("flower2").textContent="flowers:"+data["flower"];
+    }
+         });
+
+socketio.on("data3",function(data) {
+
+ $("#show3").show(); 
+ if (data["privacy"]==1) {
+    }
+    else{
+document.getElementById("user3").textContent="Username:"+data["name"];
+document.getElementById("gender3").textContent="Country:"+data["country"];
+document.getElementById("age3").textContent="Gender:"+data["gender"];
+document.getElementById("education3").textContent="Age:"+data["age"];
+document.getElementById("hobby3").textContent="Education:"+data["education"];
+document.getElementById("ps3").textContent="Hobby:"+data["hobby"];
+document.getElementById("country3").textContent="Self-Description:"+data["ps"];
+document.getElementById("flower3").textContent="flowers:"+data["flower"];
+    }
+         });
+
+		 
+  
+</script>
+        
+</body>
+</html>
+
+	  
