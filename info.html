@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Search Information</title>
+<style type="text/css">
+body{background:#ffc0cb;}
+#menu,ul,li,a{
+margin:0px;
+padding:0px;
+border:10px;
+border-color:white;
+}
+#menu li{
+list-style:none;
+float:left;
+
+}
+#menu a{
+display:block;
+text-decoration:none;
+background-color:pink;
+padding:10px;
+color:white;
+
+}
+#menu a:hover{
+background-color:#FF00CC;
+}
+.clear{
+clear:both;
+}
+#menu{
+    display:block;
+}
+field{
+    float:left;
+}
+
+</style>
+</head>
+<body>
+
+<div id="menu" class="clear">
+<ul>
+<li><a id="mypage">myPage</a></li>
+<li><a id="myprofile">myProfile</a></li>
+<li><a id="chatroom">Chat Room</a></li>
+<li><a id="date">Dating</a></li>
+<li><a id="info">Search Information</a></li>
+</ul>
+</div>
+<div class="clear">
+    
+</div>
+<br>
+
+<p></p>
+search username:
+<input type="text" id="searchuser"/>
+<button id="search" onclick="search()">search</button>
+<fieldset id="show" style ="padding:10px;">
+<legend id="user"></legend>
+<p id="username"></p>
+<p id="country"></p>
+<p id="gender"></p>
+<p id="age"></p>
+<p id="education"></p>
+<p id="hobby"></p>
+<p id="ps"></p>
+<p id="flower"></p>
+<button id="vote" onclick="vote()">give flowers</button>
+</fieldset>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script type="text/javascript">
+
+$("#show").hide();
+var socketio = io.connect("ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8083");
+var user=location.search;
+user=user.slice(1);
+document.getElementById("mypage").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com/~yuhao900914/mypage.html?"+user);
+document.getElementById("myprofile").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8082/myprofile.html?"+user);
+document.getElementById("chatroom").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8080/client.html?"+user);
+document.getElementById("date").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8081/sort.html?"+user);
+document.getElementById("info").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8083/info.html?"+user);
+
+</script>  
+<script>
+    
+function search(){
+$("#show").show();
+var un = document.getElementById("searchuser").value;
+socketio.emit("to_server", {username:un});
+
+//document.getElementById("username").appendChild(document.createTextNode("Username:"+un));
+//document.getElementById("user").appendChild(document.createTextNode("Username:"+un));
+document.getElementById("username").textContent="Username:"+un;
+document.getElementById("user").textContent=un;
+socketio.on("getdata",function(data) {
+    if (data["privacy"]==1) {
+    }
+    else{
+document.getElementById("gender").textContent="Country:"+data["country"];
+document.getElementById("age").textContent="Gender:"+data["gender"];
+document.getElementById("education").textContent="Age:"+data["age"];
+document.getElementById("hobby").textContent="Education:"+data["education"];
+document.getElementById("ps").textContent="Hobby:"+data["hobby"];
+document.getElementById("country").textContent="Self-Description:"+data["ps"];
+document.getElementById("flower").textContent="flowers:"+data["flower"];
+    }
+         });
+}
+
+function vote(){
+
+var un = document.getElementById("searchuser").value;
+socketio.emit("to_vote", {username:un});//transfer username and privacy
+socketio.on("getdata1",function(data) {
+    if (data["privacy"]==1) {
+    }
+    else{
+document.getElementById("flower").textContent="flowers:"+data["flower"];   }
+         });
+}
+
+</script>
+</body>
+</html>
