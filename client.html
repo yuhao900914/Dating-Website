@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+   <head>
+   
+   <title>chat room</title>
+   
+<style type="text/css">
+body{background:#ffc0cb;}
+#menu,ul,li,a{
+margin:0px;
+padding:0px;
+border:10px;
+border-color:white;
+}
+#menu li{
+list-style:none;
+float:left;
+
+}
+#menu a{
+display:block;
+text-decoration:none;
+background-color:pink;
+padding:10px;
+color:white;
+
+}
+#menu a:hover{
+background-color:#FF00CC;
+}
+.clear{
+clear:both;
+}
+#menu{
+    display:block;
+}
+
+
+</style>
+
+   <script src="/socket.io/socket.io.js"></script>
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+      <script type ="text/javascript">
+	 var rr= new Array();
+	 var i=0;
+	 var j=0;
+	 var Room = new Array();
+	 var flageRoom=0;
+     var socketio = io.connect("ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8080");
+	var inv=[];	
+	var haha= location.search;
+      haha=haha.slice(1);
+	  socketio.emit('adduser', haha);
+	  socketio.on('again',function(data){
+	  	  socketio.emit('adduser', prompt(data));
+	  });  
+	  socketio.on("message_to_client",function(data) {
+         //Append an HR thematic break and the escaped HTML of the new message
+         document.getElementById("chatlog").appendChild(document.createElement("hr"));
+         document.getElementById("chatlog").appendChild(document.createTextNode(data['message']));
+      });
+	  
+	 socketio.on('updatechat', function (username, data) {
+	   document.getElementById("conversation").appendChild(document.createElement("hr"));
+       document.getElementById("conversation").appendChild(document.createTextNode(data));
+		if(data=='this room has exist'){
+		display();
+		}
+	});
+    	
+		socketio.on('createroom_to_client', function (room) {
+	//   document.getElementById("intoroom").appendChild(document.createElement("hr"));
+    //   document.getElementById("intoroom").appendChild(document.createTextNode(room['room']));	
+	//   $('#chatlog').empty();
+	});
+	
+      	socketio.on('showpeople', function (people) {		
+		$('#peopleinroom').empty();
+		for(var index in people){
+	 	$('#peopleinroom').append('<br>');
+        document.getElementById("peopleinroom").appendChild(document.createTextNode(people[index]));		
+	}
+	});
+		
+    socketio.on('updaterooms',function(rooms,current_room,id,usernames){
+		  $('#intoroom').empty();
+		 
+		  $.each(id,function(kk,vv){
+				   inv.push(vv);// $('#intoroom').append('<div>' + vv + '</div>');
+				});
+		 
+		 
+		   $.each(rooms, function(key, value) {
+			//	alert('**'+value);
+ 			if(($.inArray(value,rr)<0)&&($.inArray(value,inv)<0)){
+				  rr[i] = value;
+				  i=i+1;
+				}
+		  });
+		  
+			$.each(rr,function(kk,vv){
+				    $('#intoroom').append('<div>' + vv + '</div>');
+				});
+			
+	
+		});
+		
+	socketio.on('kkkk',function(kickeduser){
+		//alert(kickeduser);
+		socketio.emit("m",kickeduser);
+	});	
+		
+	socketio.on('bbbb',function(kickeduser){
+		//alert(kickeduser);
+		socketio.emit("mb",kickeduser);
+	});	
+	
+	socketio.on('private_to_client',function(sayuser,privateuser,saywhat){
+		//alert(sayuser+privateuser+saywhat);
+		socketio.emit("private_to_server",sayuser,privateuser,saywhat);
+	});
+	  function display(){
+	    $("#create").show();
+		 $("#password").show(); 
+		 $("#createbutton").show();
+		 $("#invisible").show();
+		 $("#kick").hide();
+		 $("#kickbutton").hide();
+		 $("#ban").hide();	
+	  }
+		
+      function sendMessage(){
+         var msg = document.getElementById("message_input").value;
+		 var msgto = document.getElementById("message_people").value;
+         socketio.emit("message_to_server", {message:msg,messageto:msgto});
+      }
+	  
+	  function createRoom(){
+         var rm = document.getElementById("create").value;
+		 var pw = document.getElementById("password").value;
+		//alert("create "+rm+" successfully");
+         socketio.emit("createroom_to_server", {room : rm, password : pw});
+         $("#create").hide();
+		 $("#password").hide(); 
+		 $("#createbutton").hide();
+		 $("#invisible").hide();
+		$("#kick").show();
+		 $("#kickbutton").show();
+		 $("#ban").show();		
+		 
+	}
+	  
+	  function invisibleRoom(){
+	    var rm = document.getElementById("create").value;
+		 var pw = document.getElementById("password").value;
+		 //alert(rm)
+		//alert("create "+rm+" successfully");
+         socketio.emit("invisibleRoom_to_server", {room : rm, password : pw});
+         $("#create").hide();
+		 $("#password").hide(); 
+		 $("#createbutton").hide();
+		 $("#kick").show();
+		 $("#kickbutton").show();
+		 $("#ban").show();	
+	  }
+	  
+	   function sendRoom(){
+         var rm = document.getElementById("join").value;
+		 var pw = document.getElementById("joinpw").value;
+		 $("#create").empty();
+		 $("#password").empty(); 
+  //	alert(rm+pw);
+		 socketio.emit("join_to_server", {room : rm, password : pw});   
+	  }
+	  
+	  function kickPeople(){
+		 var pe = document.getElementById("kick").value;
+	     socketio.emit("kick_to_server",{people : pe});
+	  }
+	  
+	  function banPeople(){
+		 var pe = document.getElementById("kick").value;
+	     socketio.emit("ban_to_server",{people : pe});
+	  }
+	  
+	  
+	  
+ 
+      </script>
+   </head>
+   <body>
+    
+<div id="menu" class="clear">
+<ul>
+<li><a id="mypage">myPage</a></li>
+<li><a id="myprofile">myProfile</a></li>
+<li><a id="chatroom">Chat Room</a></li>
+<li><a id="date">Dating</a></li>
+<li><a id="info">Search Information</a></li>
+</ul>
+</div>
+<div class="clear">
+    
+</div>
+<script>
+document.getElementById("mypage").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com/~yuhao900914/mypage.html?"+haha);
+document.getElementById("myprofile").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8082/myprofile.html?"+haha);
+document.getElementById("chatroom").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8080/client.html?"+haha);
+document.getElementById("date").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8081/sort.html?"+haha);
+document.getElementById("info").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8083/info.html?"+haha);
+</script>
+   <div style="float:left;width:100px;border-right:1px solid black;height:1000px;padding:10px;overflow-y:scroll;">
+	<b>**ROOMS**</b>
+    <div id="intoroom"></div>
+    </div>
+	<div style="float:right;width:100px;border-left:1px solid black;height:1000px;padding:10px;overflow-y:scroll;">
+	<b>**PEOPLE**</b>
+	<div id="peopleinroom"></div>
+   
+	</div>
+
+      <div id="conversation" style="text-align:center"></div>
+      
+	  <input type="text" id="message_input" placeholder="message"/>
+	  to
+	  <input type="text" id="message_people" placeholder="all or someone"/>	  
+      <button onclick="sendMessage()">send</button>
+	  <br>	   
+	
+      <div id="chatlog" ></div>
+	  <script  type ="text/javascript">
+    	$("#kick").hide();
+	    $("#kickbutton").hide();	
+		$("#ban").hide();
+	</script>	    
+  </body>
+ </html>
