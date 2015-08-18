@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>myProfile</title>
+<style type="text/css">
+body{background:#ffc0cb;}
+#menu,ul,li,a{
+margin:0px;
+padding:0px;
+border:10px;
+border-color:white;
+}
+#menu li{
+list-style:none;
+float:left;
+
+}
+#menu a{
+display:block;
+text-decoration:none;
+background-color:pink;
+padding:10px;
+color:white;
+
+}
+#menu a:hover{
+background-color:#FF00CC;
+}
+.clear{
+clear:both;
+}
+#menu{
+    display:block;
+}
+field{
+    float:left;
+}
+
+</style>
+</head>
+<body>
+    
+<div id="menu" class="clear">
+<ul>
+<li><a id="mypage">myPage</a></li>
+<li><a id="myprofile">myProfile</a></li>
+<li><a id="chatroom">Chat Room</a></li>
+<li><a id="date">Dating</a></li>
+<li><a id="info">Search Information</a></li>
+</ul>
+</div>
+<div class="clear">
+    
+</div>
+<br>
+<p></p>
+<fieldset style ="padding:10px;">
+<legend id="user"></legend>
+set privacy level:<br>
+<select id="privacyL">
+<option value="0">Level 0( all your infromation is public to others)</option>
+<option value="1">Level 1( only username is public to others)</option>
+</select>
+<br>
+<button id="submit" onclick="submit()">Submit</button>
+<br><br>
+<p id="username"></p>
+<p id="privacy"></p>
+<p id="country"></p>
+<p id="gender"></p>
+<p id="age"></p>
+<p id="education"></p>
+<p id="hobby"></p>
+<p id="ps"></p>
+<p id="flower"></p>
+</fieldset>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script type="text/javascript">
+var socketio = io.connect("ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8082");
+var user=location.search;
+user=user.slice(1);
+
+document.getElementById("user").appendChild(document.createTextNode(user));
+document.getElementById("mypage").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com/~yuhao900914/mypage.html?"+user);
+document.getElementById("myprofile").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8082/myprofile.html?"+user);
+document.getElementById("chatroom").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8080/client.html?"+user);
+document.getElementById("date").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8081/sort.html?"+user);
+document.getElementById("info").setAttribute("href","http://ec2-50-112-186-234.us-west-2.compute.amazonaws.com:8083/info.html?"+user);
+document.getElementById("username").textContent="Username:"+user;
+
+socketio.emit("to_server", {username:user});//transfer username
+socketio.on("getdata",function(data) {
+document.getElementById("privacy").textContent="Privacy Level:"+data["privacy"];
+document.getElementById("gender").textContent="Country:"+data["country"];
+document.getElementById("age").textContent="Gender:"+data["gender"];
+document.getElementById("education").textContent="Age:"+data["age"];
+document.getElementById("hobby").textContent="Education:"+data["education"];
+document.getElementById("ps").textContent="Hobby:"+data["hobby"];
+document.getElementById("country").textContent="Self-Description:"+data["ps"];
+document.getElementById("flower").textContent="flowers:"+data["flower"];
+         });
+
+
+
+function submit(){
+var cy = document.getElementById("privacyL").value;
+socketio.emit("to_privacy", {username:user,privacy:cy});//transfer username and privacy
+//socketio.emit("to_server", {username:user});//transfer username
+//socketio.on("getdata",function(data) {
+document.getElementById("privacy").textContent="Privacy Level:"+cy;
+//document.getElementById("gender").textContent="Country:"+data["country"];
+//document.getElementById("age").textContent="Gender:"+data["gender"];
+//document.getElementById("education").textContent="Age:"+data["age"];
+//document.getElementById("hobby").textContent="Education:"+data["education"];
+//document.getElementById("ps").textContent="Hobby:"+data["hobby"];
+//document.getElementById("country").textContent="Self-Description:"+data["ps"];
+//document.getElementById("flower").textContent="flowers:"+data["flower"];
+ //        });
+}
+
+</script>
+</body>
+</html>
